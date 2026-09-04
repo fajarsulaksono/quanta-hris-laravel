@@ -5,8 +5,6 @@ Quanta HRIS is a complete system for managing employees. It helps companies trac
 ### About This Repository
 
 This repository contains the **Backend API** and the **Web CMS (Admin Panel)**.
-If you are looking for the mobile application code, please check:
-[Quanta HRIS Mobile App Repository](https://github.com/munovrizall/quanta-hris-flutter)
 
 ## Key Features
 
