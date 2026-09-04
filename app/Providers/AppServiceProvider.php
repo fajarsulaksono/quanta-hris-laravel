@@ -7,8 +7,10 @@ use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,10 +42,21 @@ class AppServiceProvider extends ServiceProvider
         // of the URL generator, so it 404s on subfolder deployments.
         $appUrlPath = (string) parse_url((string) config('app.url'), PHP_URL_PATH);
         if ($appUrlPath !== '' && $appUrlPath !== '/') {
+            $subdir = trim($appUrlPath, '/');
             $livewireFile = config('app.debug') ? 'livewire.js' : 'livewire.min.js';
             config([
                 'livewire.asset_url' => rtrim(config('app.url'), '/').'/livewire/'.$livewireFile,
             ]);
+
+            // The Livewire update endpoint is emitted as "/livewire/update" (root-absolute),
+            // which breaks the AJAX requests on subfolder deployments. Register a route with
+            // the subfolder prefix so the emitted data-update-uri is correct; the real
+            // requests still hit the default /livewire/update route after the alias strips
+            // the subfolder prefix.
+            Livewire::setUpdateRoute(fn ($handle) => Route::post(
+                $subdir.'/livewire/update',
+                $handle,
+            )->middleware('web')->name('subdir.livewire.update'));
         }
 
         FilamentView::registerRenderHook(
