@@ -43,29 +43,26 @@ class AbsensiService
      */
     public function getLemburDataBatch(Collection $karyawanIds, Carbon $periodeStart, Carbon $periodeEnd): array
     {
-        $lemburStats = Lembur::whereIn('karyawan_id', $karyawanIds->toArray())
+        // Agregasi durasi dilakukan di PHP karena TIME_TO_SEC()/SEC_TO_TIME()
+        // adalah fungsi khusus MySQL dan tidak tersedia di SQLite.
+        $lemburRows = Lembur::whereIn('karyawan_id', $karyawanIds->toArray())
             ->whereBetween('tanggal_lembur', [$periodeStart->format('Y-m-d'), $periodeEnd->format('Y-m-d')])
             ->where('status_lembur', 'Disetujui')
-            ->selectRaw('karyawan_id, 
-                         COUNT(*) as total_sessions,
-                         SEC_TO_TIME(SUM(TIME_TO_SEC(durasi_lembur))) as total_durasi,
-                         SUM(COALESCE(total_insentif, 0)) as total_insentif')
-            ->groupBy('karyawan_id')
-            ->get()
-            ->keyBy('karyawan_id');
+            ->get(['karyawan_id', 'durasi_lembur', 'total_insentif'])
+            ->groupBy('karyawan_id');
 
         $result = [];
         foreach ($karyawanIds as $karyawanId) {
-            $stats = $lemburStats->get($karyawanId);
+            $rows = $lemburRows->get($karyawanId, collect());
 
-            if ($stats) {
-                $durasi = Carbon::createFromFormat('H:i:s', $stats->total_durasi);
-                $totalHours = $durasi->hour + ($durasi->minute / 60) + ($durasi->second / 3600);
+            if ($rows->isNotEmpty()) {
+                $totalSeconds = $rows->sum(fn ($lembur) => $this->timeToSeconds($lembur->durasi_lembur));
+                $totalInsentif = $rows->sum(fn ($lembur) => intval($lembur->total_insentif ?? 0));
 
                 $result[$karyawanId] = [
-                    'total_lembur_hours' => round($totalHours, 1),
-                    'total_lembur_sessions' => $stats->total_sessions,
-                    'total_lembur_insentif' => intval($stats->total_insentif ?? 0),
+                    'total_lembur_hours' => round($totalSeconds / 3600, 1),
+                    'total_lembur_sessions' => $rows->count(),
+                    'total_lembur_insentif' => $totalInsentif,
                 ];
             } else {
                 $result[$karyawanId] = [
@@ -77,6 +74,16 @@ class AbsensiService
         }
 
         return $result;
+    }
+
+    /**
+     * Convert a "H:i:s" duration string to total seconds.
+     */
+    private function timeToSeconds(string $time): int
+    {
+        $parts = array_map('intval', explode(':', $time));
+
+        return ($parts[0] ?? 0) * 3600 + ($parts[1] ?? 0) * 60 + ($parts[2] ?? 0);
     }
 
     /**
