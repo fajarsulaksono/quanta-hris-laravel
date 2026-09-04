@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\LaporanKinerjaResource\Pages;
 use App\Models\Absensi;
 use App\Utils\MonthHelper;
+use App\Utils\SqlDateHelper;
 use Carbon\Carbon;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -136,14 +137,14 @@ class LaporanKinerjaResource extends Resource
     {
         return Absensi::query()
             ->selectRaw('MIN(absensi_id) as absensi_id')
-            ->selectRaw('YEAR(tanggal) as periode_tahun')
-            ->selectRaw('MONTH(tanggal) as periode_bulan')
+            ->selectRaw(SqlDateHelper::year('tanggal').' as periode_tahun')
+            ->selectRaw(SqlDateHelper::month('tanggal').' as periode_bulan')
             ->selectRaw('COUNT(*) as total_absensi')
             ->selectRaw('SUM(CASE WHEN status_masuk = "Tepat Waktu" THEN 1 ELSE 0 END) as on_time_count')
             ->selectRaw('SUM(CASE WHEN status_masuk = "Telat" THEN 1 ELSE 0 END) as late_count')
             ->selectRaw('SUM(CASE WHEN status_pulang = "Pulang Cepat" THEN 1 ELSE 0 END) as early_leave_count')
             ->selectRaw('ROUND(SUM(CASE WHEN status_masuk = "Tepat Waktu" THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100, 2) as on_time_rate')
-            ->groupByRaw('YEAR(tanggal), MONTH(tanggal)')
+            ->groupByRaw(SqlDateHelper::year('tanggal').', '.SqlDateHelper::month('tanggal'))
             ->orderByDesc('periode_tahun')
             ->orderByDesc('periode_bulan');
     }

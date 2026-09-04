@@ -7,6 +7,7 @@ use App\Models\Cuti;
 use App\Models\Izin;
 use App\Models\Lembur;
 use App\Utils\MonthHelper;
+use App\Utils\SqlDateHelper;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -22,29 +23,29 @@ class LaporanKinerjaService
 
         $periods = $periods->merge(
             Absensi::query()
-                ->selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan')
-                ->groupByRaw('YEAR(tanggal), MONTH(tanggal)')
+                ->selectRaw(SqlDateHelper::year('tanggal').' as tahun, '.SqlDateHelper::month('tanggal').' as bulan')
+                ->groupByRaw(SqlDateHelper::year('tanggal').', '.SqlDateHelper::month('tanggal'))
                 ->get()
         );
 
         $periods = $periods->merge(
             Lembur::query()
-                ->selectRaw('YEAR(tanggal_lembur) as tahun, MONTH(tanggal_lembur) as bulan')
-                ->groupByRaw('YEAR(tanggal_lembur), MONTH(tanggal_lembur)')
+                ->selectRaw(SqlDateHelper::year('tanggal_lembur').' as tahun, '.SqlDateHelper::month('tanggal_lembur').' as bulan')
+                ->groupByRaw(SqlDateHelper::year('tanggal_lembur').', '.SqlDateHelper::month('tanggal_lembur'))
                 ->get()
         );
 
         $periods = $periods->merge(
             Cuti::query()
-                ->selectRaw('YEAR(tanggal_mulai) as tahun, MONTH(tanggal_mulai) as bulan')
-                ->groupByRaw('YEAR(tanggal_mulai), MONTH(tanggal_mulai)')
+                ->selectRaw(SqlDateHelper::year('tanggal_mulai').' as tahun, '.SqlDateHelper::month('tanggal_mulai').' as bulan')
+                ->groupByRaw(SqlDateHelper::year('tanggal_mulai').', '.SqlDateHelper::month('tanggal_mulai'))
                 ->get()
         );
 
         $periods = $periods->merge(
             Izin::query()
-                ->selectRaw('YEAR(tanggal_mulai) as tahun, MONTH(tanggal_mulai) as bulan')
-                ->groupByRaw('YEAR(tanggal_mulai), MONTH(tanggal_mulai)')
+                ->selectRaw(SqlDateHelper::year('tanggal_mulai').' as tahun, '.SqlDateHelper::month('tanggal_mulai').' as bulan')
+                ->groupByRaw(SqlDateHelper::year('tanggal_mulai').', '.SqlDateHelper::month('tanggal_mulai'))
                 ->get()
         );
 

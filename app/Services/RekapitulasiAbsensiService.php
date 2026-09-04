@@ -8,6 +8,7 @@ use App\Models\Izin;
 use App\Models\Karyawan;
 use App\Models\Lembur;
 use App\Utils\MonthHelper;
+use App\Utils\SqlDateHelper;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -53,8 +54,8 @@ class RekapitulasiAbsensiService
     public function getAvailablePeriods(): SupportCollection
     {
         return Absensi::query()
-            ->selectRaw('YEAR(tanggal) as tahun, MONTH(tanggal) as bulan')
-            ->groupByRaw('YEAR(tanggal), MONTH(tanggal)')
+            ->selectRaw(SqlDateHelper::year('tanggal').' as tahun, '.SqlDateHelper::month('tanggal').' as bulan')
+            ->groupByRaw(SqlDateHelper::year('tanggal').', '.SqlDateHelper::month('tanggal'))
             ->orderByRaw('tahun desc, bulan desc')
             ->get()
             ->map(function ($row) {
