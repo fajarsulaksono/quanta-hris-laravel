@@ -35,6 +35,17 @@ class AppServiceProvider extends ServiceProvider
 
         DateTimePicker::configureUsing(fn(DateTimePicker $component) => $component->native(false));
 
+        // Fix Livewire JS path when the app runs in a subfolder (e.g. /quanta-hris).
+        // Livewire builds its <script src> from the route URI (root-absolute) instead
+        // of the URL generator, so it 404s on subfolder deployments.
+        $appUrlPath = (string) parse_url((string) config('app.url'), PHP_URL_PATH);
+        if ($appUrlPath !== '' && $appUrlPath !== '/') {
+            $livewireFile = config('app.debug') ? 'livewire.js' : 'livewire.min.js';
+            config([
+                'livewire.asset_url' => rtrim(config('app.url'), '/').'/livewire/'.$livewireFile,
+            ]);
+        }
+
         FilamentView::registerRenderHook(
             PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
             fn() => view('filament.auth.demo-accounts'),
