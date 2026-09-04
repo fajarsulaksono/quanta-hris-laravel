@@ -6,9 +6,7 @@ use App\Http\Controllers\RekapitulasiAbsensiController;
 use App\Http\Controllers\SlipGajiController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::redirect('/', '/admin');
 
 Route::get('/slip-gaji/cetak/{tahun}/{bulan}', [SlipGajiController::class, 'cetakSemuaSlipGaji'])
     ->name('slip-gaji.cetak');

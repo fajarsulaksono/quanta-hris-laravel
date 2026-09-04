@@ -5,6 +5,8 @@ namespace App\Providers;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -32,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
         }
 
         DateTimePicker::configureUsing(fn(DateTimePicker $component) => $component->native(false));
+
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+            fn() => view('filament.auth.demo-accounts'),
+        );
 
         FilamentColor::register([
             // Default colors

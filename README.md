@@ -52,7 +52,7 @@ Follow these steps to run the project on your computer:
 1.  **Clone the Repository**
 
     ```bash
-    git clone https://github.com/munovrizall/quanta-hris-laravel.git
+    git clone https://github.com/fajarsulaksono/quanta-hris-laravel.git
     cd quanta-hris-laravel
     ```
 
@@ -98,7 +98,7 @@ After running `migrate --seed`, you can use these accounts to log in:
 | **Manager HRD**     | `manager.hrd1@smartcool.id`     | `managerhrd123`     |
 | **Staff HRD**       | `staff.hrd1@smartcool.id`       | `staffhrd123`       |
 | **Manager Finance** | `manager.finance@smartcool.id`  | `managerfinance123` |
-| **Account Payment** | `account.payment11@smartcool.id`| `accountpayment123` |
+| **Account Payment** | `account.payment1@smartcool.id` | `accountpayment123` |
 | **Employee**        | `rizal@smartcool.id`            | `rizal123`          | 
 
 ## Production Deployment (Docker)
